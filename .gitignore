@@ -1,0 +1,11 @@
+# Object Files
+*.o
+*.out
+*.ppm
+*.txt
+*.html
+*.csv
+*.png
+
+#Executables
+snowman
