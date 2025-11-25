@@ -9,7 +9,7 @@
 
   If you encounter any issues feel free to reach out:
 
-  Contact: kmanda@uni-bonn.de.com
+  Contact: kmanda@uni-bonn.de
 */
 
 #include "scene.hpp"
