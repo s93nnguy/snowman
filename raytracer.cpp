@@ -267,7 +267,7 @@ void RayTracer::render(int rank, int size, std::vector<Color>& out_pixels) {
 
 void RayTracer::render_tile(const Tile& tile, std::vector<Color>& out_pixels) {
     if (!scene) {
-        if(rank == 0) std::cerr << "Scene not set!\n";
+        std::cerr << "Scene not set!\n";
         return;
     }
 
