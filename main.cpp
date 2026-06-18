@@ -233,9 +233,13 @@ int main(int argc, char* argv[]) {
         int next_tile = 0;
         int completed_tiles = 0;
 
-        for (int worker = 1; worker < size && next_tile < static_cast<int>(tiles.size()); worker++) {
-            send_tile(worker, tiles[next_tile]);
-            next_tile++;
+        for (int worker = 1; worker < size; worker++) {
+            if (next_tile < static_cast<int>(tiles.size())) {
+                send_tile(worker, tiles[next_tile]);
+                next_tile++;
+            } else {
+                send_stop(worker);
+            }
         }
 
         while (completed_tiles < static_cast<int>(tiles.size())) {
