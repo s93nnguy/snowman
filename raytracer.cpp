@@ -271,7 +271,7 @@ void RayTracer::render_tile(const Tile& tile, std::vector<Color>& out_pixels) {
         return;
     }
 
-    out_pixels.resize(tile.w + tile.h);
+    out_pixels.resize(tile.w * tile.h);
 
     Vec3 camera_pos(0, 2, 5); // Camera position
     Vec3 camera_lookat(0, 1, 0); // Point camera is looking at
