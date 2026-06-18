@@ -232,23 +232,16 @@ int main(int argc, char* argv[]) {
 
         int next_tile = 0;
         int completed_tiles = 0;
-        int active_workers = 0;
 
         for (int worker = 1; worker < size && next_tile < static_cast<int>(tiles.size()); worker++) {
             send_tile(worker, tiles[next_tile]);
             next_tile++;
-            active_workers++;
         }
 
         while (completed_tiles < static_cast<int>(tiles.size())) {
             MPI_Status status;
 
-            MPI_Probe(
-                MPI_ANY_SOURCE,
-                TAG_RESULT_META,
-                MPI_COMM_WORLD,
-                &status
-            );
+            MPI_Probe(MPI_ANY_SOURCE, TAG_RESULT_META, MPI_COMM_WORLD, &status);
 
             int worker = status.MPI_SOURCE;
 
@@ -262,13 +255,6 @@ int main(int argc, char* argv[]) {
                 send_tile(worker, tiles[next_tile]);
                 next_tile++;
             } else {
-                send_stop(worker);
-                active_workers--;
-            }
-        }
-
-        for (int worker = 1; worker < size; worker++) {
-            if (worker >= active_workers + 1) {
                 send_stop(worker);
             }
         }
