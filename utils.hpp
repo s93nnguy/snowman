@@ -58,5 +58,11 @@ struct Plane {
     Plane(const Vec3& p, const Vec3& n, const Color& c) : point(p), normal(n.normalize()), color(c) {}
 };
 
+struct Tile {
+    int x0, y0;
+    int w, h;
+    int id;
+};
+
 #endif
 

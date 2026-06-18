@@ -15,6 +15,7 @@ public:
     RayTracer(int width, int height);
     void set_scene(Scene* scene);
     void render(int rank, int size, std::vector<Color>& out_pixels);
+    void render_tile(const Tile& tile, std::vector<Color>& out_pixels);
     void save_image(const std::string& filename, const std::vector<Color>& pixels);
 
 private:
