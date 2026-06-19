@@ -254,6 +254,7 @@ int main(int argc, char* argv[]) {
 
             copy_tile(tile, tile_pixels, full_pixels, image_size);
             completed_tiles++;
+            cout << "worker: " << worker << ", completed tile: " << completed_tiles; 
 
             if (next_tile < static_cast<int>(tiles.size())) {
                 send_tile(worker, tiles[next_tile]);
