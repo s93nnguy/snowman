@@ -254,7 +254,6 @@ int main(int argc, char* argv[]) {
 
             copy_tile(tile, tile_pixels, full_pixels, image_size);
             completed_tiles++;
-            std::cout << "worker: " << worker << ", completed tile: " << completed_tiles; 
 
             if (next_tile < static_cast<int>(tiles.size())) {
                 send_tile(worker, tiles[next_tile]);
@@ -288,18 +287,34 @@ int main(int argc, char* argv[]) {
     std::chrono::duration<double> duration = end_time - start_time;
     double local_time = duration.count();
 
-    double max_time;
-    double min_time;
-    double sum_time;
-
-    MPI_Reduce(&local_time, &max_time, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-    MPI_Reduce(&local_time, &min_time, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-    MPI_Reduce(&local_time, &sum_time, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-
-    int total_tiles_rendered;
-    MPI_Reduce(&local_tiles_rendered, &total_tiles_rendered, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+    std::vector<double> all_times;
+    std::vector<int> all_tiles;
 
     if (rank == 0) {
+        all_times.resize(size);
+        all_tiles.resize(size);
+    }
+
+    MPI_Gather(&local_time, 1, MPI_DOUBLE,
+            all_times.data(), 1, MPI_DOUBLE,
+            0, MPI_COMM_WORLD);
+
+    MPI_Gather(&local_tiles_rendered, 1, MPI_INT,
+            all_tiles.data(), 1, MPI_INT,
+            0, MPI_COMM_WORLD);
+
+    if (rank == 0) {
+        double max_time = *std::max_element(all_times.begin(), all_times.end());
+        double min_time = *std::min_element(all_times.begin(), all_times.end());
+
+        double sum_time = 0.0;
+        int total_tiles_rendered = 0;
+
+        for (int i = 0; i < size; i++) {
+            sum_time += all_times[i];
+            total_tiles_rendered += all_tiles[i];
+        }
+
         std::cout << "\n--- Dynamic Tile Scheduling Performance ---\n";
         std::cout << "Image Size: " << image_size << " x " << image_size << "\n";
         std::cout << "Num Snowmen: " << num_snowmen << "\n";
