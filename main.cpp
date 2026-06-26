@@ -80,14 +80,7 @@ std::vector<Color> bytes_to_colors(const std::vector<unsigned char>& buf) {
 void send_tile(int dest, const Tile& tile) {
     int meta[5] = {tile.x0, tile.y0, tile.w, tile.h, tile.id};
 
-    MPI_Send(
-        meta,
-        5,
-        MPI_INT,
-        dest,
-        TAG_WORK,
-        MPI_COMM_WORLD
-    );
+    MPI_Send(meta, 5, MPI_INT, dest, TAG_WORK, MPI_COMM_WORLD);
 }
 
 Tile recv_tile_from_master(MPI_Status& status) {
@@ -109,74 +102,7 @@ Tile recv_tile_from_master(MPI_Status& status) {
 void send_stop(int dest) {
     int dummy[5] = {0, 0, 0, 0, -1};
 
-    MPI_Send(
-        dummy,
-        5,
-        MPI_INT,
-        dest,
-        TAG_STOP,
-        MPI_COMM_WORLD
-    );
-}
-
-void send_tile_result_to_master(
-    const Tile& tile,
-    const std::vector<Color>& tile_pixels
-) {
-    int meta[5] = {tile.x0, tile.y0, tile.w, tile.h, tile.id};
-
-    MPI_Send(
-        meta,
-        5,
-        MPI_INT,
-        0,
-        TAG_RESULT_META,
-        MPI_COMM_WORLD
-    );
-
-    std::vector<unsigned char> buf = colors_to_bytes(tile_pixels);
-
-    MPI_Send(
-        buf.data(),
-        static_cast<int>(buf.size()),
-        MPI_UNSIGNED_CHAR,
-        0,
-        TAG_RESULT_PIXELS,
-        MPI_COMM_WORLD
-    );
-}
-
-Tile recv_tile_result_meta(int source) {
-    int meta[5];
-
-    MPI_Recv(
-        meta,
-        5,
-        MPI_INT,
-        source,
-        TAG_RESULT_META,
-        MPI_COMM_WORLD,
-        MPI_STATUS_IGNORE
-    );
-
-    return Tile{meta[0], meta[1], meta[2], meta[3], meta[4]};
-}
-
-std::vector<Color> recv_tile_result_pixels(int source, const Tile& tile) {
-    int count = tile.w * tile.h * 3;
-    std::vector<unsigned char> buf(count);
-
-    MPI_Recv(
-        buf.data(),
-        count,
-        MPI_UNSIGNED_CHAR,
-        source,
-        TAG_RESULT_PIXELS,
-        MPI_COMM_WORLD,
-        MPI_STATUS_IGNORE
-    );
-
-    return bytes_to_colors(buf);
+    MPI_Send(dummy, 5, MPI_INT, dest, TAG_STOP, MPI_COMM_WORLD);
 }
 
 int main(int argc, char* argv[]) {
@@ -210,26 +136,22 @@ int main(int argc, char* argv[]) {
     RayTracer raytracer(image_size, image_size);
     raytracer.set_scene(&scene);
 
-    MPI_Barrier(MPI_COMM_WORLD);
-    auto start_time = std::chrono::high_resolution_clock::now();
+    std::vector<Color> full_pixels(image_size * image_size, Color(0, 0, 0));
 
     int local_tiles_rendered = 0;
 
-    if (size == 1) {
-        std::vector<Color> full_pixels(image_size * image_size);
+    MPI_Barrier(MPI_COMM_WORLD);
+    auto start_time = std::chrono::high_resolution_clock::now();
 
+    if (size == 1) {
         for (const auto& tile : tiles) {
             std::vector<Color> tile_pixels;
             raytracer.render_tile(tile, tile_pixels);
             copy_tile(tile, tile_pixels, full_pixels, image_size);
             local_tiles_rendered++;
         }
-
-        raytracer.save_image("output.ppm", full_pixels);
     }
     else if (rank == 0) {
-        std::vector<Color> full_pixels(image_size * image_size);
-
         int next_tile = 0;
         int completed_tiles = 0;
 
@@ -243,16 +165,12 @@ int main(int argc, char* argv[]) {
         }
 
         while (completed_tiles < static_cast<int>(tiles.size())) {
+            int done;
             MPI_Status status;
 
-            MPI_Probe(MPI_ANY_SOURCE, TAG_RESULT_META, MPI_COMM_WORLD, &status);
+            MPI_Recv(&done, 1, MPI_INT, MPI_ANY_SOURCE, TAG_DONE, MPI_COMM_WORLD, &status);
 
             int worker = status.MPI_SOURCE;
-
-            Tile tile = recv_tile_result_meta(worker);
-            std::vector<Color> tile_pixels = recv_tile_result_pixels(worker, tile);
-
-            copy_tile(tile, tile_pixels, full_pixels, image_size);
             completed_tiles++;
 
             if (next_tile < static_cast<int>(tiles.size())) {
@@ -262,9 +180,6 @@ int main(int argc, char* argv[]) {
                 send_stop(worker);
             }
         }
-
-        raytracer.save_image("output.ppm", full_pixels);
-        std::cout << "Image saved to output.ppm\n";
     }
     else {
         while (true) {
@@ -278,10 +193,29 @@ int main(int argc, char* argv[]) {
             std::vector<Color> tile_pixels;
             raytracer.render_tile(tile, tile_pixels);
 
-            send_tile_result_to_master(tile, tile_pixels);
+            copy_tile(tile, tile_pixels, local_pixels, image_size);
             local_tiles_rendered++;
-        }
+
+            int done = 1;
+            MPI_Send(&done, 1, MPI_INT, 0, TAG_DONE, MPI_COMM_WORLD);
     }
+
+    std::vector<unsigned char> local_bytes = colors_to_bytes(local_pixels);
+    std::vector<unsigned char> full_bytes;
+
+    if (rank == 0) {
+        full_bytes.resize(image_size * image_size * 3);
+    }
+
+    MPI_Reduce(
+        local_bytes.data(),
+        rank == 0 ? full_bytes.data() : nullptr,
+        image_size * image_size * 3,
+        MPI_UNSIGNED_CHAR,
+        MPI_MAX,
+        0,
+        MPI_COMM_WORLD
+    );
 
     auto end_time = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> duration = end_time - start_time;
@@ -295,15 +229,34 @@ int main(int argc, char* argv[]) {
         all_tiles.resize(size);
     }
 
-    MPI_Gather(&local_time, 1, MPI_DOUBLE,
-            all_times.data(), 1, MPI_DOUBLE,
-            0, MPI_COMM_WORLD);
+    MPI_Gather(
+        &local_time,
+        1,
+        MPI_DOUBLE,
+        rank == 0 ? all_times.data() : nullptr,
+        1,
+        MPI_DOUBLE,
+        0,
+        MPI_COMM_WORLD
+    );
 
-    MPI_Gather(&local_tiles_rendered, 1, MPI_INT,
-            all_tiles.data(), 1, MPI_INT,
-            0, MPI_COMM_WORLD);
+    MPI_Gather(
+        &local_tiles_rendered,
+        1,
+        MPI_INT,
+        rank == 0 ? all_tiles.data() : nullptr,
+        1,
+        MPI_INT,
+        0,
+        MPI_COMM_WORLD
+    );
 
     if (rank == 0) {
+        std::vector<Color> full_pixels = bytes_to_colors(full_bytes);
+
+        raytracer.save_image("output.ppm", full_pixels);
+        std::cout << "Image saved to output.ppm\n";
+
         double max_time = *std::max_element(all_times.begin(), all_times.end());
         double min_time = *std::min_element(all_times.begin(), all_times.end());
 
