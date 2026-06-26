@@ -192,14 +192,14 @@ int main(int argc, char* argv[]) {
             std::vector<Color> tile_pixels;
             raytracer.render_tile(tile, tile_pixels);
 
-            copy_tile(tile, tile_pixels, local_pixels, image_size);
+            copy_tile(tile, tile_pixels, full_pixels, image_size);
             local_tiles_rendered++;
 
             int done = 1;
             MPI_Send(&done, 1, MPI_INT, 0, TAG_DONE, MPI_COMM_WORLD);
     }
 
-    std::vector<unsigned char> local_bytes = colors_to_bytes(local_pixels);
+    std::vector<unsigned char> local_bytes = colors_to_bytes(full_pixels);
     std::vector<unsigned char> full_bytes;
 
     if (rank == 0) {
