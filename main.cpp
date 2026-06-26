@@ -10,8 +10,7 @@
 #include "utils.hpp"
 
 const int TAG_WORK = 1;
-const int TAG_RESULT_META = 2;
-const int TAG_RESULT_PIXELS = 3;
+const int TAG_DONE = 2;
 const int TAG_STOP = 4;
 
 std::vector<Tile> make_tiles(int width, int height, int tile_size) {
