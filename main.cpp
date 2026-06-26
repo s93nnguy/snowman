@@ -197,6 +197,7 @@ int main(int argc, char* argv[]) {
 
             int done = 1;
             MPI_Send(&done, 1, MPI_INT, 0, TAG_DONE, MPI_COMM_WORLD);
+        }
     }
 
     std::vector<unsigned char> local_bytes = colors_to_bytes(full_pixels);
