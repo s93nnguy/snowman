@@ -229,27 +229,8 @@ int main(int argc, char* argv[]) {
         all_tiles.resize(size);
     }
 
-    MPI_Gather(
-        &local_time,
-        1,
-        MPI_DOUBLE,
-        rank == 0 ? all_times.data() : nullptr,
-        1,
-        MPI_DOUBLE,
-        0,
-        MPI_COMM_WORLD
-    );
-
-    MPI_Gather(
-        &local_tiles_rendered,
-        1,
-        MPI_INT,
-        rank == 0 ? all_tiles.data() : nullptr,
-        1,
-        MPI_INT,
-        0,
-        MPI_COMM_WORLD
-    );
+    MPI_Gather(&local_time, 1, MPI_DOUBLE, rank == 0 ? all_times.data() : nullptr, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(&local_tiles_rendered, 1, MPI_INT, rank == 0 ? all_tiles.data() : nullptr, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     if (rank == 0) {
         std::vector<Color> full_pixels = bytes_to_colors(full_bytes);
