@@ -1,6 +1,11 @@
 # Compiler and flags
 CXX = mpic++
+OPENMP ?= 1
 CXXFLAGS = -O3 -std=c++17
+
+ifeq ($(OPENMP),1)
+CXXFLAGS += -fopenmp
+endif
 
 # Source files
 SRCS = main.cpp raytracer.cpp scene.cpp
@@ -19,4 +24,3 @@ $(TARGET): $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(TARGET)
-

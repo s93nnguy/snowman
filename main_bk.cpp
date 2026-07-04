@@ -4,11 +4,6 @@
 #include <string>
 #include <chrono>
 #include <algorithm>
-#include <cstdlib>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 #include "raytracer.hpp"
 #include "scene.hpp"
@@ -17,39 +12,6 @@
 const int TAG_WORK = 1;
 const int TAG_DONE = 2;
 const int TAG_STOP = 4;
-
-bool use_collapse_two() {
-    const char* value = std::getenv("SNOWMAN_OMP_COLLAPSE");
-    if (!value) {
-        return true;
-    }
-
-    std::string mode(value);
-    return !(mode == "0" || mode == "false" || mode == "FALSE" || mode == "off" || mode == "OFF");
-}
-
-int openmp_threads() {
-#ifdef _OPENMP
-    return omp_get_max_threads();
-#else
-    return 1;
-#endif
-}
-
-std::string mpi_thread_support_name(int support) {
-    switch (support) {
-        case MPI_THREAD_SINGLE:
-            return "single";
-        case MPI_THREAD_FUNNELED:
-            return "funneled";
-        case MPI_THREAD_SERIALIZED:
-            return "serialized";
-        case MPI_THREAD_MULTIPLE:
-            return "multiple";
-        default:
-            return "unknown";
-    }
-}
 
 std::vector<Tile> make_tiles(int width, int height, int tile_size) {
     std::vector<Tile> tiles;
@@ -143,8 +105,7 @@ void send_stop(int dest) {
 }
 
 int main(int argc, char* argv[]) {
-    int mpi_thread_support = MPI_THREAD_SINGLE;
-    MPI_Init_thread(&argc, &argv, MPI_THREAD_FUNNELED, &mpi_thread_support);
+    MPI_Init(&argc, &argv);
 
     int rank, size;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -293,9 +254,6 @@ int main(int argc, char* argv[]) {
         std::cout << "Num Snowmen: " << num_snowmen << "\n";
         std::cout << "Tile Size: " << tile_size << " x " << tile_size << "\n";
         std::cout << "MPI Processes: " << size << "\n";
-        std::cout << "OpenMP Threads per Process: " << openmp_threads() << "\n";
-        std::cout << "OpenMP Collapse(2): " << (use_collapse_two() ? "enabled" : "disabled") << "\n";
-        std::cout << "MPI Thread Support: " << mpi_thread_support_name(mpi_thread_support) << "\n";
         std::cout << "Total Tiles: " << tiles.size() << "\n";
         std::cout << "Rendered Tiles: " << total_tiles_rendered << "\n";
         std::cout << "Max Time: " << max_time << " seconds\n";
