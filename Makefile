@@ -1,7 +1,8 @@
 # Compiler and flags
+# CXX = scorep mpic++
 CXX = mpic++
 OPENMP ?= 1
-CXXFLAGS = -O3 -std=c++17
+CXXFLAGS = -O3 -std=c++17 -g
 
 ifeq ($(OPENMP),1)
 CXXFLAGS += -fopenmp
