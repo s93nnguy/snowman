@@ -46,15 +46,15 @@ export OMP_PROC_BIND=close
 # SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=8 perf-report --output=${OUT}/dynamic_04p_08t_064s_c1 mpirun -n 4 --map-by slot:PE=8 --bind-to core ./snowman 1024 4 dynamic 64
 
 # tile-size comparison
-SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_008s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 8 >> ./logs/ex04/collapse_8.out
-SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_016s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 16 >> ./logs/ex04/collapse_16.out
-SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_032s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 32 >> ./logs/ex04/collapse_32.out
-SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_064s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 64 >> ./logs/ex04/collapse_64.out
+# SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_008s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 8 >> ./logs/ex04/collapse_8.out
+# SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_016s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 16 >> ./logs/ex04/collapse_16.out
+SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/cdynamic_04p_12t_032s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 32 >> ./logs/ex04/collapse_32.out
+# SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_064s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 64 >> ./logs/ex04/collapse_64.out
 
-SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_008s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 8 >> ./logs/ex04/no_collapse_08.out
-SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_016s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 16 >> ./logs/ex04/no_collapse_16.out
+# SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_008s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 8 >> ./logs/ex04/no_collapse_08.out
+# SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_016s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 16 >> ./logs/ex04/no_collapse_16.out
 SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_032s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 32 >> ./logs/ex04/no_collapse_32.out
-SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_064s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 64 >> ./logs/ex04/no_collapse_64.out
+# SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/dynamic_04p_12t_064s mpirun -n 4 --report-bindings --bind-to numa ./snowman 1024 4 dynamic 64 >> ./logs/ex04/no_collapse_64.out
 
 # MPI/OpenMP balance with 48 total cores
 # SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=12 perf-report --output=${OUT}/dynamic_04p_12t_064s mpirun -n 4 --map-by slot:PE=12 --bind-to core ./snowman 1024 4 dynamic 64
