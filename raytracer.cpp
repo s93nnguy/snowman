@@ -512,8 +512,8 @@ void RayTracer::render_tile(const Tile& tile, std::vector<Color>& out_pixels) {
             }
         }
     } else {
+        #pragma omp parallel for schedule(static)
         for (int y = tile.y0; y < tile.y0 + tile.h; ++y) {
-            #pragma omp parallel for schedule(static)
             for (int x = tile.x0; x < tile.x0 + tile.w; ++x) {
                 render_pixel(y, x);
             }
