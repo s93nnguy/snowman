@@ -78,6 +78,6 @@ export OMP_PROC_BIND=close
 # SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=6  OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/exp03_dynamic_08p_06t_032s mpirun -n 8  --report-bindings --bind-to numa ./snowman 1024 4 dynamic 32
 # SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=12 OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/exp03_dynamic_04p_12t_032s mpirun -n 4  --report-bindings --bind-to numa ./snowman 1024 4 dynamic 32
 
-SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=4  OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/exp04_dynamic_12p_04t_032s mpirun -n 12 --report-bindings --map-by node:PE=4 --bind-to core ./snowman 1024 4 dynamic 32
-SNOWMAN_OMP_COLLAPSE=0 OMP_NUM_THREADS=4  OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/exp04_static_12p_04t_000s mpirun -n 12 --report-bindings  --map-by node:PE=4 --bind-to core ./snowman 1024 4 static
+SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=4  OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/exp04_dynamic_12p_04t_032s mpirun -n 12 --report-bindings --map-by node:PE=4 --bind-to core ./snowman 1024 4 dynamic 32
+SNOWMAN_OMP_COLLAPSE=1 OMP_NUM_THREADS=4  OMP_DISPLAY_AFFINITY=True OMP_PLACES=cores OMP_PROC_BIND=close perf-report --output=${OUT}/exp04_static_12p_04t_000s mpirun -n 12 --report-bindings  --map-by node:PE=4 --bind-to core ./snowman 1024 4 static
 
