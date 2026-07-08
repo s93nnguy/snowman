@@ -85,18 +85,25 @@ std::string schedule_mode_name(ScheduleMode mode) {
 }
 
 std::vector<Tile> make_tiles(int width, int height, int tile_size) {
-    std::vector<Tile> tiles;
-    int id = 0;
+    int tiles_x = (width + tile_size - 1) / tile_size;
+    int tiles_y = (height + tile_size - 1) / tile_size;
 
-    for (int y = 0; y < height; y += tile_size) {
-        for (int x = 0; x < width; x += tile_size) {
-            tiles.push_back({
+    std::vector<Tile> tiles(tiles_x * tiles_y);
+
+    #pragma omp parallel for collapse(2)
+    for (int ty = 0; ty < tiles_y; ty++) {
+        for (int tx = 0; tx < tiles_x; tx++) {
+            int x = tx * tile_size;
+            int y = ty * tile_size;
+            int id = ty * tiles_x + tx;
+
+            tiles[id] = {
                 x,
                 y,
                 std::min(tile_size, width - x),
                 std::min(tile_size, height - y),
-                id++
-            });
+                id
+            };
         }
     }
 
@@ -109,6 +116,7 @@ void copy_tile(
     std::vector<Color>& full_pixels,
     int image_width
 ) {
+    #pragma omp parallel for collapse(2)
     for (int ty = 0; ty < tile.h; ty++) {
         for (int tx = 0; tx < tile.w; tx++) {
             int tile_idx = ty * tile.w + tx;
@@ -124,6 +132,7 @@ void copy_tile(
 std::vector<unsigned char> colors_to_bytes(const std::vector<Color>& pixels) {
     std::vector<unsigned char> buf(pixels.size() * 3);
 
+    #pragma omp parallel for
     for (size_t i = 0; i < pixels.size(); i++) {
         buf[3 * i + 0] = pixels[i].r;
         buf[3 * i + 1] = pixels[i].g;
@@ -136,6 +145,7 @@ std::vector<unsigned char> colors_to_bytes(const std::vector<Color>& pixels) {
 std::vector<Color> bytes_to_colors(const std::vector<unsigned char>& buf) {
     std::vector<Color> pixels(buf.size() / 3);
 
+    #pragma omp parallel for
     for (size_t i = 0; i < pixels.size(); i++) {
         pixels[i] = Color(
             buf[3 * i + 0],

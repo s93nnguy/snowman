@@ -121,6 +121,7 @@ void RayTracer::render(int rank, int size, std::vector<Color>& out_pixels) {
     std::normal_distribution<double> dist_xz(0.0, 6.0);
     std::uniform_real_distribution<double> dist_y(-1.0, 25.0);
 
+    #pragma omp parallel for
     for (int i = 0; i < snowflake_count; ++i) {
         double x_rand = dist_xz(rng);
         double y_rand = dist_y(rng);
@@ -344,6 +345,7 @@ void RayTracer::render_tile(const Tile& tile, std::vector<Color>& out_pixels) {
     std::normal_distribution<double> dist_xz(0.0, 6.0);
     std::uniform_real_distribution<double> dist_y(-1.0, 25.0);
 
+    #pragma omp parallel for
     for (int i = 0; i < snowflake_count; ++i) {
         double x_rand = dist_xz(rng);
         double y_rand = dist_y(rng);
